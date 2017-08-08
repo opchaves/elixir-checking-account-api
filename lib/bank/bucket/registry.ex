@@ -1,4 +1,4 @@
-defmodule Bank.BucketRegistry do
+defmodule Bank.Bucket.Registry do
   use GenServer
 
   ## Client API
@@ -49,7 +49,7 @@ defmodule Bank.BucketRegistry do
     if Map.has_key?(names, name) do
       {:noreply, {names, refs}}
     else
-      {:ok, pid} = Bank.Bucket.start_link([])
+      {:ok, pid} = Bank.Bucket.Bucket.start_link([])
       ref = Process.monitor(pid)
       refs = Map.put(refs, ref, name)
       names = Map.put(names, name, pid)

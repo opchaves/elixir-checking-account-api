@@ -1,4 +1,4 @@
-defmodule Bank.BucketSupervisor do
+defmodule Bank.Bucket.Supervisor do
   use Supervisor
 
   def start_link(opts) do
@@ -7,7 +7,7 @@ defmodule Bank.BucketSupervisor do
 
   def init(:ok) do
     children = [
-      {Bank.BucketRegistry, name: Bank.BucketRegistry}
+      {Bank.Bucket.Registry, name: Bank.Bucket.Registry}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

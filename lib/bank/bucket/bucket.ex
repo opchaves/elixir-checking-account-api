@@ -1,4 +1,4 @@
-defmodule Bank.Bucket do
+defmodule Bank.Bucket.Bucket do
   use Agent
 
   @doc """
