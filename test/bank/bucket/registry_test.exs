@@ -2,6 +2,7 @@ defmodule Bank.Bucket.RegistryTest do
   use ExUnit.Case, async: true
 
   alias Bank.Bucket.{Bucket, Registry}
+  alias Bank.Accounts.Operation
 
   setup do
     {:ok, registry} = start_supervised Registry
@@ -14,8 +15,8 @@ defmodule Bank.Bucket.RegistryTest do
     Registry.create(registry, "operations")
     assert {:ok, bucket} = Registry.lookup(registry, "operations")
 
-    Bucket.put(bucket, "123", %{"number" => "123"})
-    assert Bucket.get(bucket, "123") == %{"number" => "123"}
+    Bucket.put(bucket, "123", %Operation{number: "123"})
+    assert Bucket.get(bucket, "123") == [%Operation{number: "123"}]
   end
 
   test "removes buckets on exit", %{registry: registry} do

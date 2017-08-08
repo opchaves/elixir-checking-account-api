@@ -1,9 +1,11 @@
 defmodule Bank.Bucket.Supervisor do
   use Supervisor
 
-  def start_link(opts) do
-    Supervisor.start_link(__MODULE__, :ok, opts)
-  end
+  def start_link, do: Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
+  
+  # def start_link(opts) do
+  #   Supervisor.start_link(__MODULE__, :ok, opts)
+  # end
 
   def init(:ok) do
     children = [

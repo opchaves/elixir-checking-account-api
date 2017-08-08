@@ -1,6 +1,8 @@
 defmodule BankWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :bank
 
+  alias Bank.Bucket.Registry
+
   socket "/socket", BankWeb.UserSocket
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -45,6 +47,8 @@ defmodule BankWeb.Endpoint do
   configuration should be loaded from the system environment.
   """
   def init(_key, config) do
+    Registry.create(Registry, "operations")
+
     if config[:load_from_system_env] do
       port = System.get_env("PORT") || raise "expected the PORT environment variable to be set"
       {:ok, Keyword.put(config, :http, [:inet6, port: port])}

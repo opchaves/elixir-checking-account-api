@@ -7,5 +7,7 @@ defmodule BankWeb.Router do
 
   scope "/api", BankWeb do
     pipe_through :api
+
+    get "/accounts/:number/operations", AccountController, :index
   end
 end

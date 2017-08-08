@@ -9,14 +9,14 @@ defmodule Bank.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
+      supervisor(Bank.Bucket.Supervisor, []),
       supervisor(BankWeb.Endpoint, []),
       # Start your own worker by calling: Bank.Worker.start_link(arg1, arg2, arg3)
       # worker(Bank.Worker, [arg1, arg2, arg3]),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    Bank.Bucket.Supervisor.start_link(name: Bank.Bucket.Supervisor)
+    # for other strategies and supported options]
     opts = [strategy: :one_for_one, name: Bank.Supervisor]
     Supervisor.start_link(children, opts)
   end

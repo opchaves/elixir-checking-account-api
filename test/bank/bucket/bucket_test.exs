@@ -2,6 +2,7 @@ defmodule Bank.Bucket.BucketTest do
   use ExUnit.Case, async: true
 
   alias Bank.Bucket.Bucket
+  alias Bank.Accounts.Operation
 
   setup do
     {:ok, bucket} = start_supervised Bucket
@@ -13,7 +14,7 @@ defmodule Bank.Bucket.BucketTest do
   test "stores values by key", %{bucket: bucket} do
     assert Bucket.get(bucket, "123") == nil
 
-    Bucket.put(bucket, "123", %{"number" => "123"})
-    assert Bucket.get(bucket, "123") == %{"number" => "123"}
+    Bucket.put(bucket, "123", %Operation{number: "123"})
+    assert Bucket.get(bucket, "123") == [%Operation{number: "123"}]
   end
 end

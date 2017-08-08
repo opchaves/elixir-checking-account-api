@@ -19,6 +19,14 @@ defmodule Bank.Bucket.Bucket do
   Puts the `value` for the given `key` in the `bucket
   """
   def put(bucket, key, value) do
-    Agent.update(bucket, &Map.put(&1, key, value))
+    operations = Agent.get(bucket, &Map.get(&1, key))
+
+    operations = 
+      case operations do
+        nil -> [value]
+        _ -> operations ++ [value]
+      end
+      
+    Agent.update(bucket, &Map.put(&1, key, operations))
   end
 end
