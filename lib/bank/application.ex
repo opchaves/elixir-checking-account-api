@@ -16,6 +16,7 @@ defmodule Bank.Application do
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
+    Bank.BucketSupervisor.start_link(name: Bank.BucketSupervisor)
     opts = [strategy: :one_for_one, name: Bank.Supervisor]
     Supervisor.start_link(children, opts)
   end
