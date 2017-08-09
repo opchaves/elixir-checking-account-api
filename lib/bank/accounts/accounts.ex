@@ -22,4 +22,10 @@ defmodule Bank.Accounts do
     Bucket.put(bucket, number, attrs)
     {:ok, attrs}
   end
+
+  def get_balance(number) do
+    {:ok, bucket} = Registry.lookup(Registry, "operations")
+    balance = Bucket.get(bucket, number)
+    |> Enum.reduce(0, fn(x, acc) -> x + acc end) 
+  end
 end
