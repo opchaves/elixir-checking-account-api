@@ -20,5 +20,6 @@ defmodule Bank.Accounts do
   def create_operation(number, attrs \\ %Operation{}) do
     {:ok, bucket} = Registry.lookup(Registry, "operations")
     Bucket.put(bucket, number, attrs)
+    {:ok, attrs}
   end
 end

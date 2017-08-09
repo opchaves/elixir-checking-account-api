@@ -22,8 +22,12 @@ defmodule BankWeb.AccountController do
       date: NaiveDateTime.from_iso8601!(operation["date"])
     }
 
-    Accounts.create_operation(number, operation)
-    render(conn, "show.json", operation: operation)
+    with {:ok, %Operation{} = operation} <- Accounts.create_operation(number, operation) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", account_path(conn, :index, number))
+      |> render("show.json", operation: operation)
+    end
   end
 
 
