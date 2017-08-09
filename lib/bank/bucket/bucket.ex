@@ -21,12 +21,12 @@ defmodule Bank.Bucket.Bucket do
   def put(bucket, key, value) do
     operations = Agent.get(bucket, &Map.get(&1, key))
 
-    operations = 
+    operations =
       case operations do
         nil -> [value]
         _ -> operations ++ [value]
       end
-      
+
     Agent.update(bucket, &Map.put(&1, key, operations))
   end
 end
