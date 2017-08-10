@@ -30,11 +30,10 @@ defmodule BankWeb.AccountController do
     end
   end
 
-
-  def balance(conn, _params) do
-    render(conn, "index.json", operations: [%{}])
+  def balance(conn, %{"number" => number}) do
+    balance = Accounts.get_balance number
+    render(conn, "balance.json", balance: balance)
   end
-
 
   def statement(conn, _params) do
     render(conn, "index.json", operations: [%{}])

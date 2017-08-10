@@ -12,6 +12,10 @@ defmodule BankWeb.AccountView do
     %{data: render_one(operation, AccountView, "operation.json")}
   end
 
+  def render("balance.json", %{balance: balance}) do
+    %{data: %{balance: balance}}
+  end
+
   def render("operation.json", %{account: operation}) do
     %{number: operation.number,
       type: operation.type,
