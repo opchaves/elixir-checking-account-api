@@ -66,10 +66,15 @@ defmodule BankWeb.AccountControllerTest do
       end)
 
       conn = get conn, account_path(conn, :statement, @number, "2017-08-01T00:00:00", "2017-08-02T23:59:59")
-      assert %{
-        "2017-08-01" => %{"balance" => 350.0, "operations" => [%{}, %{}]},
-        "2017-08-02" => %{"balance" => 965.0, "operations" => [%{}, %{}]}
-      } = json_response(conn, 200)["data"]
+      assert [%{
+        "date" => "2017-08-01",
+        "operations" => [%{}, %{}],
+        "balance" => 350.0
+      }, %{
+        "date" => "2017-08-02",
+        "operations" => [%{}, %{}],
+        "balance" => 1315.0
+      }] = json_response(conn, 200)["data"]
     end
   end
 end

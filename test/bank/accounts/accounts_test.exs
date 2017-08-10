@@ -46,11 +46,9 @@ defmodule Bank.Accounts.AccountsTest do
   test "get the bank statement of a period of dates" do
     Enum.each(@operations, &Accounts.create_operation(@number, &1))
 
-    # with pattern matching checks that end result is a map where each key is a `date` and its value
-    # is a map containing all operations of that day and the balance of the day
-    assert %{
-      ~D[2017-08-01] => %{balance: 350, operations: [%Operation{}, %Operation{}]},
-      ~D[2017-08-02] => %{balance: 965, operations: [%Operation{}, %Operation{}]}
-    } = Accounts.get_statement(@number, ~N[2017-08-01 00:00:00], ~N[2017-08-02 23:59:59])  
+    assert [
+      %{balance: 350, date: ~D[2017-08-01], operations: _}, 
+      %{balance: 1315, date: ~D[2017-08-02], operations: _}
+    ] = Accounts.get_statement(@number, ~N[2017-08-01 00:00:00], ~N[2017-08-02 23:59:59])
   end
 end

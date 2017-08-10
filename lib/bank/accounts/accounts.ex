@@ -92,9 +92,18 @@ defmodule Bank.Accounts do
   """
   def calc_balance_by_date(ops_by_date) do
     ops_by_date
-    |> Enum.reduce(%{}, fn({date, ops}, map) -> 
-    balance = calculate_balance(ops)
-    Map.update(map, date, %{operations: ops, balance: balance}, &(&1))
+    |> Enum.reduce([], fn({date, operations}, current_state) -> 
+      acc_balance = case List.last(current_state) do
+        nil -> 0
+        last -> last.balance
+      end
+      day_balance = calculate_balance(operations)
+
+      current_state ++ [%{
+        date: date,
+        operations: operations,
+        balance: acc_balance + day_balance,
+      }]
     end)
   end
 
