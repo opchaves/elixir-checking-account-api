@@ -1,34 +1,39 @@
 defmodule Bank.Accounts.AccountsTest do
   use ExUnit.Case, async: true
+  doctest Bank.Accounts
 
-  alias Bank.Bucket.Bucket
+  alias Bank.Bucket.{Registry}
+  alias Bank.Accounts
   alias Bank.Accounts.Operation
 
   @operations [
-    %Operation{number: "123", amount: "500", description: "some operation", type: "deposit", date: "2017-08-01T00:00:00"},
-    %Operation{number: "123", amount: "1000", description: "some operation", type: "deposit", date: "2017-08-02T00:00:00"},
-    %Operation{number: "123", amount: "150", description: "some operation", type: "purchase", date: "2017-08-01T00:00:00"},
-    %Operation{number: "123", amount: "35", description: "some operation", type: "purchase", date: "2017-08-02T00:00:00"},
-    %Operation{number: "123", amount: "220", description: "some operation", type: "withdrawal", date: "2017-08-05T00:00:00"},
-    %Operation{number: "123", amount: "390", description: "some operation", type: "withdrawal", date: "2017-08-08T00:00:00"}
+    %Operation{number: "123", amount: 500, description: "some operation", type: "deposit", date: ~N[2017-08-01 00:00:00]},
+    %Operation{number: "123", amount: 1000, description: "some operation", type: "deposit", date: ~N[2017-08-02 00:00:00]},
+    %Operation{number: "123", amount: 150, description: "some operation", type: "purchase", date: ~N[2017-08-01 00:00:00]},
+    %Operation{number: "123", amount: 35, description: "some operation", type: "purchase", date: ~N[2017-08-02 00:00:00]},
+    %Operation{number: "123", amount: 220, description: "some operation", type: "withdrawal", date: ~N[2017-08-05 00:00:00]},
+    %Operation{number: "123", amount: 390, description: "some operation", type: "withdrawal", date: NaiveDateTime.utc_now}
   ]
 
   setup do
-    {:ok, bucket} = start_supervised Bucket
-    # ExUnit will merge this map into the test context
-    %{bucket: bucket}
+    Registry.stop(Registry)
+    start_supervised Registry
+    Registry.create(Registry, "operations")
   end
 
   # extract the bucket from the test context (is a map) with pattern matching
-  test "stores values by key", %{bucket: bucket} do
-    assert Bucket.get(bucket, "123") == nil
+  test "stores an operation an retrieves by account number" do
+    assert Accounts.get_operations_by_account("123") == []
+  
+    assert {:ok, %Operation{} = operation} = Accounts.create_operation("123", List.first(@operations))
 
-    Bucket.put(bucket, "123", %Operation{number: "123"})
-    assert Bucket.get(bucket, "123") == [%Operation{number: "123"}]
+    assert Accounts.get_operations_by_account("123") == [operation]
   end
 
-  test "get current balance of a given account", %{bucket: bucket} do
-    @operations
-    |> Enum.each(&Bucket.put(bucket, "123", &1))
+  test "get current balance of a given account" do
+    Enum.each(@operations, &Accounts.create_operation("123", &1))
+    assert length(Accounts.get_operations_by_account("123")) == 6
+
+    assert Accounts.get_balance("123") == 705
   end
 end
