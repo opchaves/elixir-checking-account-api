@@ -2,8 +2,6 @@ defmodule BankWeb.AccountView do
   use BankWeb, :view
   alias BankWeb.AccountView
 
-  alias Bank.Accounts.Operation
-
   def render("index.json", %{operations: operations}) do
     %{data: render_many(List.flatten(operations), AccountView, "operation.json")}
   end
@@ -14,6 +12,10 @@ defmodule BankWeb.AccountView do
 
   def render("balance.json", %{balance: balance}) do
     %{data: %{balance: balance}}
+  end
+
+  def render("statement.json", %{statement: statement}) do
+    %{data: statement} 
   end
 
   def render("operation.json", %{account: operation}) do

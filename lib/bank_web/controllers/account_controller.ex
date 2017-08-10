@@ -35,7 +35,10 @@ defmodule BankWeb.AccountController do
     render(conn, "balance.json", balance: balance)
   end
 
-  def statement(conn, _params) do
-    render(conn, "index.json", operations: [%{}])
+  def statement(conn, %{"number" => number, "start_date" => start_date, "end_date" => end_date}) do
+    start_date = NaiveDateTime.from_iso8601!(start_date)
+    end_date = NaiveDateTime.from_iso8601!(end_date)
+    statement = Accounts.get_statement(number, start_date, end_date)
+    render(conn, "statement.json", statement: statement)
   end
 end
