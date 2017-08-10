@@ -7,6 +7,8 @@ defmodule Bank.Accounts do
   alias Bank.Accounts.Operation
 
   @bucket_name "operations"
+  @debit_types ["purchase", "withdrawal", "debits"]
+  @credit_types ["deposit", "salary", "credits"]
 
   def get_operations_by_account(number) do
     {:ok, bucket} = Registry.lookup(Registry, @bucket_name)
@@ -35,15 +37,18 @@ defmodule Bank.Accounts do
     Bucket.get(bucket, number)
     |> sort_operations_by_date
     |> filter_operations_till_now
-    |> Enum.reduce(0, &balance_reduce/2) 
+    |> calculate_balance 
   end
 
-  def balance_reduce(%Operation{amount: amount, type: type}, acc) do
-    if Enum.member?(["purchase", "withdrawal", "debits"], type) do
-      acc - amount
-    else
-      acc + amount
-    end
+  def calculate_balance(operations) do
+    operations
+    |> Enum.reduce(0, fn(%{type: type, amount: amount}, acc) -> 
+      cond do
+        Enum.member?(@credit_types, type) -> acc + amount
+        Enum.member?(@debit_types, type) -> acc - amount
+        true -> acc
+      end
+    end)
   end
 
   defp filter_operations_till_now(operations) do
