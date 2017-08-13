@@ -1,18 +1,37 @@
 defmodule BankWeb.AccountControllerTest do
   use BankWeb.ConnCase
 
-  @single_operation %{number: "123", amount: "500", description: "some operation", type: "deposit", date: "2017-08-01T00:00:00"}
+  alias Bank.Utils.DateUtil
+
+  @account_number "123"
+  @today DateUtil.date_time(NaiveDateTime.utc_now, :start)
+  @ten_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 10))
+  @nine_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 9))
+  @seven_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 7))
+  @six_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 6))
+  @four_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 4))
+  @three_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 3))
+  @two_days_ago NaiveDateTime.to_string(DateUtil.subtract_days(@today, 2))
+
+  @operation %{number: @account_number, amount: "500", description: "Deposit", type: "deposit", date: @ten_days_ago}
 
   @operations [
-    %{number: "123", amount: "1000", description: "some operation", type: "deposit", date: "2017-08-02T00:00:00"},
-    %{number: "123", amount: "500", description: "some operation", type: "deposit", date: "2017-08-01T00:00:00"},
-    %{number: "123", amount: "150", description: "some operation", type: "purchase", date: "2017-08-01T00:00:00"},
-    %{number: "123", amount: "35", description: "some operation", type: "purchase", date: "2017-08-02T00:00:00"},
-    %{number: "123", amount: "220", description: "some operation", type: "withdrawal", date: "2017-08-05T00:00:00"},
-    %{number: "123", amount: "390", description: "some operation", type: "withdrawal", date: "2017-08-08T00:00:00"}
+    %{number: @account_number, amount: "500", description: "Deposit", type: "deposit", date: @ten_days_ago},
+    %{number: @account_number, amount: "150", description: "Amazon", type: "purchase", date: @ten_days_ago},
+    %{number: @account_number, amount: "50", description: "Deposit", type: "deposit", date: @nine_days_ago},
+    %{number: @account_number, amount: "500", description: "Best Buy", type: "purchase", date: @nine_days_ago},
+    %{number: @account_number, amount: "200", description: "Salary", type: "salary", date: @seven_days_ago},
+    %{number: @account_number, amount: "80", description: "Withdrawal", type: "withdrawal", date: @six_days_ago},
+    %{number: @account_number, amount: "60", description: "Amazon", type: "purchase", date: @four_days_ago},
+    %{number: @account_number, amount: "900", description: "Salary", type: "salary", date: @three_days_ago},
+    %{number: @account_number, amount: "730", description: "Withdrawal", type: "withdrawal", date: @three_days_ago},
+    %{number: @account_number, amount: "250", description: "Forever", type: "purchase", date: @two_days_ago},
   ]
 
-  @number "123"
+  @dt_ten_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 10)))
+  @dt_nine_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 9)))
+  @dt_seven_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 7)))
+  @dt_six_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 6)))
 
   setup do
     # ensure a clean state for each test
@@ -26,23 +45,23 @@ defmodule BankWeb.AccountControllerTest do
 
   describe "index" do
     test "list all operations of a given account", %{conn: conn} do
-      conn = get conn, account_path(conn, :index, @number)
+      conn = get conn, account_path(conn, :index, @account_number)
       assert json_response(conn, 200)["data"] == []
     end
   end
 
   describe "creates an operation" do
     test "renders operation when data is valid", %{conn: conn} do
-      conn = post conn, account_path(conn, :create, @number), operation: @single_operation
-      assert %{"number" => number} = json_response(conn, 201)["data"]
+      conn = post conn, account_path(conn, :create, @account_number), operation: @operation
+      assert %{"number" => @account_number} = json_response(conn, 201)["data"]
 
-      conn = get conn, account_path(conn, :index, number)
+      conn = get conn, account_path(conn, :index, @account_number)
       assert json_response(conn, 200)["data"] == [%{
-        "number" => number,
-        "amount" => 500,
-        "description" => "some operation",
+        "number" => @account_number,
+        "amount" => 500.0,
+        "description" => "Deposit",
         "type" => "deposit",
-        "date" => "2017-08-01T00:00:00"
+        "date" => String.replace(@ten_days_ago, " ", "T")
       }]
     end
   end
@@ -50,11 +69,11 @@ defmodule BankWeb.AccountControllerTest do
   describe "get balance" do
     test "renders the balance of a given account", %{conn: conn} do
       Enum.each(@operations, fn operation ->
-        post conn, account_path(conn, :create, @number), operation: operation
+        post conn, account_path(conn, :create, @account_number), operation: operation
       end)
 
-      conn = get conn, account_path(conn, :balance, @number)
-      assert json_response(conn, 200)["data"] == %{"balance" => 705}
+      conn = get conn, account_path(conn, :balance, @account_number)
+      assert json_response(conn, 200)["data"] == %{"balance" => -120}
     end
   end
 
@@ -62,19 +81,16 @@ defmodule BankWeb.AccountControllerTest do
     # TODO add another test to handle the case an invalid date is passed in or end_date > start_date
     test "renders the account statement of a period of dates", %{conn: conn} do
       Enum.each(@operations, fn operation ->
-        post conn, account_path(conn, :create, @number), operation: operation
+        post conn, account_path(conn, :create, @account_number), operation: operation
       end)
 
-      conn = get conn, account_path(conn, :statement, @number, "2017-08-01T00:00:00", "2017-08-02T23:59:59")
-      assert [%{
-        "date" => "2017-08-01",
-        "operations" => [%{}, %{}],
-        "balance" => 350.0
-      }, %{
-        "date" => "2017-08-02",
-        "operations" => [%{}, %{}],
-        "balance" => 1315.0
-      }] = json_response(conn, 200)["data"]
+      conn = get conn, account_path(conn, :statement, @account_number, @ten_days_ago, @six_days_ago)
+      assert [
+        %{"balance" => 350.0, "date" => @dt_ten_days_ago, "operations" => [%{}, %{}]}, 
+        %{"balance" => -100.0, "date" => @dt_nine_days_ago, "operations" => [%{}, %{}]}, 
+        %{"balance" => 100.0, "date" => @dt_seven_days_ago, "operations" => [%{}]}, 
+        %{"balance" => 20.0, "date" => @dt_six_days_ago, "operations" => [%{}]}, 
+      ] = json_response(conn, 200)["data"]
     end
   end
 end
