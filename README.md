@@ -1,14 +1,48 @@
-# Bank
+# Elixir + Phoenix - Checking Account REST API
 
-To start your Phoenix server:
+A REST API that handles operations (credit and debit) in a given checking account.
 
-  * Install dependencies with `mix deps.get`
-  * Run test with `mix test --seed 0`
-  * Start Phoenix endpoint with `mix phx.server`
+This project is using:
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+* [Elixir](https://elixir-lang.org) - Functional programming language
+* [Phoenix Framework](http://phoenixframework.org) - An Elixir Web Framework
+* [Git](https://git-scm.com) - Version Control System
+* [Gitlab](https://gitlab.com) - Online Service to host and share Git repositories with the world
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+To get started you have to have installed on your machine [Git](https://git-scm.com) and [Erlang + Elixir](https://elixir-lang.org/install.html).
+
+### Installing Elixir
+
+[Follow the instruction to install Elixir on your machine](https://elixir-lang.org/install.html)
+
+### Cloning the repository
+
+```sh
+git clone https://gitlab.com/opaulochaves/checking-account-api.git
+cd checking-account-api
+```
+
+### Getting the dependencies
+
+```sh
+mix deps.get
+```
+
+### Running tests
+
+```sh
+mix test
+```
+
+> There are unit and integration tests. The tests run in parallel.
+
+### Starting the server
+
+```sh
+mix phx.server
+```
+
+> The server is available at [localhost:4000](http://localhost:4000). I suggest you to test the API using a REST client called *Postman*.
 
 ## Learn more
 
