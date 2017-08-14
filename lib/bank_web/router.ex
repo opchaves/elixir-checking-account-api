@@ -12,5 +12,6 @@ defmodule BankWeb.Router do
     post "/accounts/:number/operations", AccountController, :create
     get "/accounts/:number/balance", AccountController, :balance
     get "/accounts/:number/statement/:start_date/:end_date", AccountController, :statement
+    get "/accounts/:number/debts", AccountController, :debts
   end
 end

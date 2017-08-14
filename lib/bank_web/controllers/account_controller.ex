@@ -41,4 +41,9 @@ defmodule BankWeb.AccountController do
     statement = Accounts.get_statement(number, start_date, end_date)
     render(conn, "statement.json", statement: statement)
   end
+
+  def debts(conn, %{"number" => number}) do
+    period_debts = Accounts.get_periods_of_debt(number)
+    render(conn, "debts.json", debts: period_debts)
+  end
 end

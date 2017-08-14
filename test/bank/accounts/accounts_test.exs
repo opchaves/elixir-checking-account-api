@@ -11,6 +11,7 @@ defmodule Bank.Accounts.AccountsTest do
   @today DateUtil.date_time(NaiveDateTime.utc_now, :start)
   @ten_days_ago DateUtil.subtract_days(@today, 10)
   @nine_days_ago DateUtil.subtract_days(@today, 9)
+  @eight_days_ago DateUtil.subtract_days(@today, 8)
   @seven_days_ago DateUtil.subtract_days(@today, 7)
   @six_days_ago DateUtil.subtract_days(@today, 6)
   @four_days_ago DateUtil.subtract_days(@today, 4)
@@ -32,8 +33,11 @@ defmodule Bank.Accounts.AccountsTest do
 
   @dt_ten_days_ago NaiveDateTime.to_date(@ten_days_ago)
   @dt_nine_days_ago NaiveDateTime.to_date(@nine_days_ago)
+  @dt_eight_days_ago NaiveDateTime.to_date(@eight_days_ago)
   @dt_seven_days_ago NaiveDateTime.to_date(@seven_days_ago)
   @dt_six_days_ago NaiveDateTime.to_date(@six_days_ago)
+  @dt_four_days_ago NaiveDateTime.to_date(@four_days_ago)
+  @dt_two_days_ago NaiveDateTime.to_date(@two_days_ago)
 
   setup do
     # ensure a clean state for each test
@@ -71,5 +75,15 @@ defmodule Bank.Accounts.AccountsTest do
       %{balance: 20, date: @dt_six_days_ago, operations: [%Operation{}]}, 
     ] = Accounts.get_statement(@account_number, @ten_days_ago, @six_days_ago)
 
+  end
+
+  test "computes periods of debt" do
+    Enum.each(@operations, &Accounts.create_operation(@account_number, &1))
+
+    assert [
+      %{principal: -100, start: @dt_nine_days_ago, end: @dt_eight_days_ago},
+      %{principal: -40, start: @dt_four_days_ago, end: @dt_four_days_ago},
+      %{principal: -120, start: @dt_two_days_ago},
+    ] = Accounts.get_periods_of_debt(@account_number)
   end
 end

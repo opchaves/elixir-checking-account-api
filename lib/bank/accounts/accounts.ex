@@ -39,7 +39,7 @@ defmodule Bank.Accounts do
     |> filter_operations_till_now
     |> calculate_balance 
   end
-
+  
   def calculate_balance(operations) do
     operations
     |> Enum.reduce(0, fn(%{type: type, amount: amount}, acc) -> 
@@ -84,6 +84,53 @@ defmodule Bank.Accounts do
     |> filter_by_period(start_date, end_date)
     |> group_by_date
     |> calc_balance_by_date
+  end
+
+  def get_periods_of_debt(number) do
+    {:ok, bucket} = Registry.lookup(Registry, @bucket_name)
+    Bucket.get(bucket, number)
+    |> sort_operations_by_date
+    |> group_by_date
+    |> calc_balance_by_date
+    |> process_periods_of_debt
+  end
+
+  defp process_periods_of_debt(operations_by_date) do
+    period_debts =
+      operations_by_date
+      |> Enum.reduce([], fn(%{balance: balance, date: date} = cur, state) -> 
+        cond do
+          balance < 0 ->
+            if length(state) > 0 do
+              previous = state |> List.last
+              if previous |> Map.has_key?(:end) == false do
+                previous = Map.update(previous, :principal, balance, fn(_) -> balance end)
+                List.replace_at(state, -1, previous)
+              else
+                state ++ [%{principal: balance, start: date}]
+              end
+            else
+              state ++ [%{principal: balance, start: date}]
+            end
+          balance >= 0 ->
+            if length(state) > 0 do
+              previous = state |> List.last 
+              if previous |> Map.has_key?(:end) == false do
+                if Date.compare(date, Date.utc_today) != :gt do
+                  previous = Map.update(previous, :end, Date.add(date, -1), &(&1))
+                  List.replace_at(state, -1, previous)
+                else
+                  state
+                end
+              else
+                state
+              end
+            else
+              state
+            end
+        end  
+      end)
+    period_debts
   end
 
   @doc """

@@ -28,10 +28,13 @@ defmodule BankWeb.AccountControllerTest do
     %{number: @account_number, amount: "250", description: "Forever", type: "purchase", date: @two_days_ago},
   ]
 
-  @dt_ten_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 10)))
-  @dt_nine_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 9)))
-  @dt_seven_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 7)))
-  @dt_six_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 6)))
+  @dt_10_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 10)))
+  @dt_9_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 9)))
+  @dt_8_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 8)))
+  @dt_7_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 7)))
+  @dt_6_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 6)))
+  @dt_4_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 4)))
+  @dt_2_days_ago Date.to_string(NaiveDateTime.to_date(DateUtil.subtract_days(@today, 2)))
 
   setup do
     # ensure a clean state for each test
@@ -86,10 +89,25 @@ defmodule BankWeb.AccountControllerTest do
 
       conn = get conn, account_path(conn, :statement, @account_number, @ten_days_ago, @six_days_ago)
       assert [
-        %{"balance" => 350.0, "date" => @dt_ten_days_ago, "operations" => [%{}, %{}]}, 
-        %{"balance" => -100.0, "date" => @dt_nine_days_ago, "operations" => [%{}, %{}]}, 
-        %{"balance" => 100.0, "date" => @dt_seven_days_ago, "operations" => [%{}]}, 
-        %{"balance" => 20.0, "date" => @dt_six_days_ago, "operations" => [%{}]}, 
+        %{"balance" => 350.0, "date" => @dt_10_days_ago, "operations" => [%{}, %{}]}, 
+        %{"balance" => -100.0, "date" => @dt_9_days_ago, "operations" => [%{}, %{}]}, 
+        %{"balance" => 100.0, "date" => @dt_7_days_ago, "operations" => [%{}]}, 
+        %{"balance" => 20.0, "date" => @dt_6_days_ago, "operations" => [%{}]}, 
+      ] = json_response(conn, 200)["data"]
+    end
+  end
+
+  describe "Compute periods of debt" do
+    test "renders the periods in which the account balance was negative", %{conn: conn} do
+      Enum.each(@operations, fn operation ->
+        post conn, account_path(conn, :create, @account_number), operation: operation
+      end) 
+
+      conn = get conn, account_path(conn, :debts, @account_number)
+      assert [
+        %{"principal" => -100.0, "start" => @dt_9_days_ago, "end" => @dt_8_days_ago},
+        %{"principal" => -40.0, "start" => @dt_4_days_ago, "end" => @dt_4_days_ago},
+        %{"principal" => -120.0, "start" => @dt_2_days_ago},
       ] = json_response(conn, 200)["data"]
     end
   end

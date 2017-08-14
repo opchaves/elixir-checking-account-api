@@ -18,6 +18,10 @@ defmodule BankWeb.AccountView do
     %{data: statement} 
   end
 
+  def render("debts.json", %{debts: debts}) do
+    %{data: debts} 
+  end
+
   def render("operation.json", %{account: operation}) do
     %{number: operation.number,
       type: operation.type,
