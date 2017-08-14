@@ -44,6 +44,121 @@ mix phx.server
 
 > The server is available at [localhost:4000](http://localhost:4000). I suggest you to test the API using a REST client called *Postman*.
 
+## API
+
+All endpoints accept and return JSON. When making requests to the API you should set a header `Accept: application/json`.
+
+The API contains four endpoints:
+
+### GET /accounts/:number/operations
+
+List all operations of a checking account where account number is `:number`
+
+Example Request:
+
+```
+GET /accounts/123/operations
+
+{
+  "data": [
+    {...},
+    {...}
+  ]
+}
+```
+
+### POST /accounts/:number/operations
+
+Add an operations to a given account
+
+Example Request:
+
+```
+POST /accounts/123/operations
+
+{
+  "operation": {
+    "type": "deposit",
+    "description": "A deposit",
+    "amount": "750",
+    "date": "2017-08-10T00:00:00"
+  }
+}
+```
+
+Response:
+
+```
+201 Created
+
+{
+  "data": {
+    "type": "deposit",
+    "number": "123",
+    "description": "A deposit",
+    "amount": 750,
+    "date": "2017-08-10T00:00:00"
+  }
+}
+```
+
+### GET /accounts/:number/balance
+
+Get the current balance of a given checking account
+
+Example Request:
+
+```
+GET /accounts/123/balance
+
+{
+  "data": {
+    "balance": 750
+  }
+}
+```
+
+### GET /accounts/:number/statement/:start_date/:end_date
+
+Get the bank statement of a period of dates. It returns a list where each element
+is an object containing a `date`, list of `operations` of the day, and the `balance` at the end of the day
+
+Example Request:
+
+```
+GET /accounts/123/statement/2017-08-01/2017-08-10
+
+{
+  "data": [
+    {
+      "operations": [{...}],
+      "date": "2017-08-10",
+      "balance": 750
+    }
+  ]
+```
+
+### GET /accounts/:number/debts
+
+Get the periods of debts. Returns a list of periods where each element is an object that contains `start_date`, `end_date` and `debt`
+
+Example Request:
+
+```
+GET /accounts/123/debts
+
+{
+  "data": [
+    {
+      "start_date": 9999-01-01,
+      "end_date": 9999-12-31,
+      "debt": -999
+    }
+  ]
+```
+
+--------------
+
 ## Learn more
 
   * Official website: http://www.phoenixframework.org/
