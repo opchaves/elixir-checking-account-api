@@ -87,7 +87,7 @@ defmodule BankWeb.AccountControllerTest do
         post conn, account_path(conn, :create, @account_number), operation: operation
       end)
 
-      conn = get conn, account_path(conn, :statement, @account_number, @ten_days_ago, @six_days_ago)
+      conn = get conn, account_path(conn, :statement, @account_number, @dt_10_days_ago, @dt_6_days_ago)
       assert [
         %{"balance" => 350.0, "date" => @dt_10_days_ago, "operations" => [%{}, %{}]}, 
         %{"balance" => -100.0, "date" => @dt_9_days_ago, "operations" => [%{}, %{}]}, 

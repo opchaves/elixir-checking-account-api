@@ -47,8 +47,8 @@ defmodule BankWeb.AccountController do
   Third step: Get the bank statement 
   """
   def statement(conn, %{"number" => number, "start_date" => start_date, "end_date" => end_date}) do
-    start_date = NaiveDateTime.from_iso8601!(start_date)
-    end_date = NaiveDateTime.from_iso8601!(end_date)
+    start_date = NaiveDateTime.from_iso8601!(start_date <> "T00:00:00")
+    end_date = NaiveDateTime.from_iso8601!(end_date <> "T23:59:59")
     statement = Accounts.get_statement(number, start_date, end_date)
     render(conn, "statement.json", statement: statement)
   end
