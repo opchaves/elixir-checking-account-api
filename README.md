@@ -86,6 +86,10 @@ POST /accounts/123/operations
 }
 ```
 
+* `type` can be `deposit`, `salary`, `credits`, `withdrawal`, `purchase`, `debts`
+* `amount` must be `> 0`
+* `date` must be `<= CURRENT_DATE`
+
 Response:
 
 ```
