@@ -18,9 +18,6 @@ defmodule Bank.Accounts do
     end
   end
 
-  @doc """
-  Creates an operation.
-  """
   def create_operation(number, attrs \\ %Operation{}) do
     {:ok, bucket} = Registry.lookup(Registry, @bucket_name)
     Bucket.put(bucket, number, attrs)
@@ -40,6 +37,9 @@ defmodule Bank.Accounts do
     |> calculate_balance 
   end
   
+  @doc """
+  Returns the balance given a list of operations of a given account
+  """
   def calculate_balance(operations) do
     operations
     |> Enum.reduce(0, fn(%{type: type, amount: amount}, acc) -> 
@@ -51,6 +51,7 @@ defmodule Bank.Accounts do
     end)
   end
 
+  # Returns a list containing all operations of a given account where the date is <= today 
   defp filter_operations_till_now(operations) do
     now = NaiveDateTime.utc_now
 
@@ -77,6 +78,9 @@ defmodule Bank.Accounts do
     end) 
   end
 
+  @doc """
+  Get the bank state of a given account of a period of dates 
+  """
   def get_statement(number, start_date, end_date \\ NaiveDateTime.utc_now) do
     {:ok, bucket} = Registry.lookup(Registry, @bucket_name)
     Bucket.get(bucket, number)
@@ -86,6 +90,9 @@ defmodule Bank.Accounts do
     |> calc_balance_by_date
   end
 
+  @doc """
+  Returns a lists containing the period of debts of a given account if applicable
+  """
   def get_periods_of_debt(number) do
     {:ok, bucket} = Registry.lookup(Registry, @bucket_name)
     Bucket.get(bucket, number)
@@ -98,7 +105,7 @@ defmodule Bank.Accounts do
   defp process_periods_of_debt(operations_by_date) do
     period_debts =
       operations_by_date
-      |> Enum.reduce([], fn(%{balance: balance, date: date} = cur, state) -> 
+      |> Enum.reduce([], fn(%{balance: balance, date: date}, state) -> 
         cond do
           balance < 0 ->
             if length(state) > 0 do
@@ -134,8 +141,12 @@ defmodule Bank.Accounts do
   end
 
   @doc """
+  Return a list where each element is a map containing `date`, `operations` and `balance` accumulated until `date`
   
-  ## Examples 
+  `[%{date: ~D[2017-08-01], operations: [], balance: 100}]`
+
+  `ops_by_date` is a map of operations grouped by date in which map key is a `date` and `value`
+  is a list of operations.
   """
   def calc_balance_by_date(ops_by_date) do
     ops_by_date
