@@ -2,6 +2,33 @@
 
 A REST API that handles operations (credit and debit) in a given checking account.
 
+Operations of an account are organized with a struct containing `type`, `number`, `description`, `amount` and `date`.
+
+* `type` represents types of operations allowed to put (`deposit`, `salary`, `credits`) money and take (`withdrawal`, `purchase`, `debits`) money from the account
+* `number` is the account number
+* `description` is a description of the operations
+* `amount` is value added or taken from the account
+* `date` is the date in which the operation happened
+
+To store all operations of a given account is being used an `Agent` which represents a bucket where all operations are stored with the following structure
+where all operations are group by account. That way you can easily see which operations belong to an account and easily retrieve the operations of an account
+
+```json
+{
+  "123": [operation, operation],
+  "456": [operation, operation],
+}
+```
+
+There's only one bucket created, it's called `operations` and store all operations. That buckekt is created through a `GenServer` that manages all created buckets. If the API
+had to manage clients, for example, to store clients, you would just need to request the `GenServer` to create a bucket and pass the name of the new bucket `clients`. This
+`GenServer` is created in the module `Bank.Bucket.Registry`. The `GenServer` is supervised by the supervisor created in the module `Bank.Bucket.Supervisor`.
+
+The operations can be added with the date in any given order and whenever a request is sent to check the balance, get account statement or see if there are periods of debts,
+the operations are ordered by date before doing any computation on the operations.
+
+------------------
+
 This project is using:
 
 * [Elixir](https://elixir-lang.org) - Functional programming language
